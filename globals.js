@@ -77,5 +77,10 @@ app.times = 0;
 
 app.drawScene;
 
+app.ifcFile = {};
+app.drawingInfo = {};
+app.loadComplete = false;
+
+app.vertexCount = 0;
 
 

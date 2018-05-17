@@ -20,7 +20,6 @@ function Array2Buffer(array, iSize, nSize) {
 function drawElement(buffer, textureobj, hasTexture, bodyColor = [1.0, 1.0, 1.0]) {
   // Tell WebGL how to pull out the positions from the position
   // buffer into the vertexPosition attribute
-
   mat4.transpose(app.normalMatrix, mat4.invert(app.normalMatrix, app.modelViewMatrix));
   
   {
@@ -29,7 +28,7 @@ function drawElement(buffer, textureobj, hasTexture, bodyColor = [1.0, 1.0, 1.0]
     const normalize = false;
     const stride = 0;
     const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer.position);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer.vertices);
     gl.vertexAttribPointer(
       app.programInfo.attribLocations.vertexPosition,
       numComponents,
@@ -39,44 +38,6 @@ function drawElement(buffer, textureobj, hasTexture, bodyColor = [1.0, 1.0, 1.0]
       offset);
     gl.enableVertexAttribArray(
       app.programInfo.attribLocations.vertexPosition);
-  }
-
-  // Tell WebGL how to pull out the texture coordinates from
-  // the texture coordinate buffer into the textureCoord attribute.
-  {
-    const numComponents = 2;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer.textureCoord);
-    gl.vertexAttribPointer(
-      app.programInfo.attribLocations.textureCoord,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset);
-    gl.enableVertexAttribArray(
-      app.programInfo.attribLocations.textureCoord);
-  }
-
-  {
-    const numComponents = 3;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer.normal);
-    gl.vertexAttribPointer(
-      app.programInfo.attribLocations.vertexNormal,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset);
-    gl.enableVertexAttribArray(
-      app.programInfo.attribLocations.vertexNormal);
   }
 
   // Tell WebGL which indices to use to index the vertices
@@ -96,24 +57,9 @@ function drawElement(buffer, textureobj, hasTexture, bodyColor = [1.0, 1.0, 1.0]
     app.programInfo.uniformLocations.modelViewMatrix,
     false,
     app.modelViewMatrix);
-  gl.uniformMatrix4fv(
-    app.programInfo.uniformLocations.normalMatrix,
-    false,
-    app.normalMatrix);
-  gl.uniform1i(app.programInfo.uniformLocations.hasTexture, hasTexture);
-  gl.uniform4f(app.programInfo.uniformLocations.bodyColor, bodyColor[0], bodyColor[1], bodyColor[2], bodyColor[3]);
+  //gl.uniform1i(app.programInfo.uniformLocations.hasTexture, hasTexture);
+  //gl.uniform4f(app.programInfo.uniformLocations.bodyColor, bodyColor[0], bodyColor[1], bodyColor[2], bodyColor[3]);
 
-  // Specify the texture to map onto the faces.
-
-  if (hasTexture) {
-    // Tell WebGL we want to affect texture unit 0
-    gl.activeTexture(gl.TEXTURE0);
-
-    // Bind the texture to texture unit 0
-    gl.bindTexture(gl.TEXTURE_2D, textureobj.texture);
-  }
-  // Tell the shader we bound the texture to texture unit 0
-  gl.uniform1i(app.programInfo.uniformLocations.uSampler, 0);
 
   {
     const vertexCount = buffer.vertexCount;

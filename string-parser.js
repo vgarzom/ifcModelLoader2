@@ -60,3 +60,7 @@ var StringParser = function(str) {
     }
     return i - start;
   }
+
+  function getContentInParenthesis(str) {
+    return str.match(/\(([^)]+)\)/)[1];
+  }

@@ -12,165 +12,26 @@
   <!-- Main Shader -->
 
   <script id="shader-fs" type="x-shader/x-fragment">
-    //Estructura de datos para las luces puntuales
-    struct LightInfo {
-      highp vec3 position; //Posicion de la luz puntual
-      highp vec4 color; //Color de la luz puntual
-      highp float intensity; //Intensidad de la luz puntual
-    };
-
-    struct SpotLightInfo {
-      highp vec3 position;  // Position in eye coords.
-      highp float intensity; // Amb., Diff., and Specular intensity
-      highp vec3 direction; // Normalized direction of the spotlight
-      highp float exponent; // Angular attenuation exponent
-      highp float cutoff;   // Cutoff angle (between 0 and 90)
-      highp vec4 color;
-    };
-
-    varying highp vec2 vTextureCoord;
-    varying highp vec3 vLighting;
-
-    uniform bool uHasTexture;
-    uniform lowp vec4 uBodyColor;
-
-    uniform sampler2D uSampler;
-
     varying lowp vec4 vColor;
-    varying highp vec4 vPosition;
-    varying highp vec4 vNormal;
-
-    //Point Lights
-    const int pointLightCount = 3;
-    uniform LightInfo uPointLights[pointLightCount];
-
-    //SpotLight
-    const int spotLightCount = 4;
-    uniform SpotLightInfo uSpotLights[spotLightCount];
-
-    //Reflectividad
-    highp float Kd = 0.7; // Diffuse reflectivity
-    highp float Ka = 0.2; // Ambient reflectivity
-    highp float Ks = 0.9; // Specular reflectivity
-    highp float Shininess = 180.0;// Specular shininess factor
-
-
-
-    highp vec3 addPointLight(LightInfo pointLight){
-        highp float dist = distance(vPosition.xyz, pointLight.position);
-      highp float md =5.0;
-      highp float att=1.0-dist/md;
-      if (dist <= md){
-        highp vec3 s = normalize (pointLight.position - vPosition.xyz);
-        highp vec3 v = normalize(-vPosition.xyz);
-        highp vec3 r = reflect( -s, vNormal.xyz );
-        highp float I = pointLight.intensity;
-        return att * pointLight.color.rgb * I * (
-                    Kd * max(dot(s, vNormal.xyz), 0.0 ) + 
-                    Ks * pow(max(dot(r,v), 0.0), Shininess));
-      }else{
-        return vec3(0.0,0.0,0.0);
-      }
-    }
-
-    highp vec3 addSpotLight(SpotLightInfo spotLight)
-    {
-      highp vec3 s = normalize (spotLight.position - vPosition.xyz);
-      highp vec3 spotDir = normalize(spotLight.direction);
-      highp float angle = acos (dot(-s, spotDir));
-      highp float cutoff = radians ( clamp(spotLight.cutoff, 0.0, 90.0));
-        
-        if(angle < cutoff){
-          highp float spotFactor = pow( dot(-s, spotDir), spotLight.exponent );
-          highp vec3 v = normalize(vec3(-vPosition.xyz));
-          highp vec3 h = normalize( v + s );
-          highp float I = spotLight.intensity;
-          return   spotLight.color.rgb * spotFactor * I * (Ka +
-                      Kd * max(dot(s, vNormal.xyz), 0.0 ));
-        }
-      else{
-        return vec3(0.0,0.0,0.0);
-      }
-    }
-
     void main(void) {
-
-      // Point Light
-      highp vec3 lighting = vLighting;
-      for (int i = 0; i < pointLightCount; i++){
-        lighting += addPointLight(uPointLights[i]);
-      }
-
-      for (int i = 0; i < spotLightCount; i++){
-        lighting += addSpotLight(uSpotLights[i]);
-      }
-
-      if (uHasTexture){
-        highp vec4 texelColor = texture2D(uSampler, vTextureCoord);
-        gl_FragColor = vec4(texelColor.rgb * lighting, texelColor.a);
-      }else{
-        gl_FragColor = vec4(vColor.rgb * lighting, vColor.a);
-      }
+      gl_FragColor = vColor;
     }
   </script>
 
   <script id="shader-vs" type="x-shader/x-vertex">
-    struct LightInfo {
-      highp vec3 position; //Posicion de la luz puntual
-      highp vec4 color; //Color de la luz puntual
-      highp float intensity; //Intensidad de la luz puntual
-    };
-    
-    attribute highp vec4 aVertexPosition;
-    attribute highp vec3 aVertexNormal;
-    attribute highp vec2 aTextureCoord;
-    
-    uniform bool uHasTexture;
-    uniform lowp vec4 uBodyColor;
-
-    //Ambient Light
-    uniform highp vec3 uAmbientLight;
-
-    //Directional Light variables
-    uniform LightInfo uDirectionalLight;
-
-    
-
-    uniform mat4 uNormalMatrix;
+    attribute vec4 aVertexPosition;
     uniform mat4 uModelViewMatrix;
     uniform mat4 uProjectionMatrix;
-
-    varying highp vec2 vTextureCoord;
     varying lowp vec4 vColor;
-    varying highp vec3 vLighting;
-    varying highp vec4 vPosition;
-    varying highp vec4 vNormal;
-
-    
     void main(void) {
       gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
-      
-      if (uHasTexture) {
-        vTextureCoord = aTextureCoord;
-      } else {
-        vColor = uBodyColor;
-      }
-
-      // Apply lighting effect
-
-      // Directional Light
-      highp vec3 directionalVector = normalize(uDirectionalLight.position);
-      vNormal = normalize(uNormalMatrix * vec4(aVertexNormal, 1.0));
-      highp float directional = max(dot(vNormal.xyz, directionalVector), 0.0);
-      vPosition = uModelViewMatrix * aVertexPosition;
-      vLighting = uAmbientLight + (uDirectionalLight.intensity * uDirectionalLight.color.rgb * directional);
-      
-      
+      vColor = vec4(1.0, 0.0, 0.0, 1.0);
     }
   </script>
   <script type='text/javascript' src='interface_controller.js'></script>
   <script type='text/javascript' src='libs/webgl-obj-loader.js'></script>
   <script type='text/javascript' src='string-parser.js'></script>
+  <script type='text/javascript' src='objects.js'></script>
   <script type='text/javascript' src='IFCParser.js'></script>
   <script type='text/javascript' src='file-loader.js'></script>
   <script type='text/javascript' src='constant-strings.js'></script>

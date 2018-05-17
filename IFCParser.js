@@ -18,6 +18,8 @@ var IFCDoc = function (url) {
     // Información de Schema
     this.file_schema = new String();
 
+    this.data = [];
+
     // Información sobre vértices, materiales, etc.
     this.mtls = new Array(0);      // Initialize the property for MTL
     this.objects = new Array(0);   // Initialize the property for Object
@@ -68,17 +70,30 @@ IFCDoc.prototype.parse = function (fileString) {
                 }
                 continue; // Go to the next line
             case file_name:
-                if(parsingHeader){
+                if (parsingHeader) {
                     index = this.parseHeaderFileName(lines, index);
                 }
                 continue;
+            case file_schema:
+                if (parsingHeader) {
+                    this.parseSchema(line);
+                }
+                continue;
+            default:
+                if (command.indexOf("#") !== -1 && parsingData) {
+                    this.parseDataLine(line);
+                }
+                continue;
+
         }
     }
+    app.ifcFile = this;
+    this.onLoadComplete();
     return true;
 }
 
-IFCDoc.prototype.parseHeaderFileName = function(lines, index) {
-    var line = removeCommentsOnLine(lines[index-1]);
+IFCDoc.prototype.parseHeaderFileName = function (lines, index) {
+    var line = removeCommentsOnLine(lines[index - 1]);
     var filename = "";
     var endFilename = false;
     while (!endFilename) {
@@ -86,15 +101,107 @@ IFCDoc.prototype.parseHeaderFileName = function(lines, index) {
         endFilename = line.endsWith(');');
         line = removeCommentsOnLine(lines[index++]);
     }
-    filename = filename.replace('FILE_NAME(','').replace(');','');
+    filename = filename.replace('FILE_NAME(', '').replace(');', '');
     var filename_data = filename.split(',');
-    this.name = filename_data[0].replace(/'/g,'');
-    this.time_stamp = filename_data[1].replace(/'/g,'');
-    this.author = filename_data[2].replace(/'/g,'');
-    this.organization = filename_data[3].replace(/'/g,'');
-    this.preprocessor_version = filename_data[4].replace(/'/g,'');
-    this.originating_system = filename_data[5].replace(/'/g,'');
-    this.authorization = filename_data[6].replace(/'/g,'');
-    console.log(this);
+    this.name = filename_data[0].replace(/'/g, '');
+    this.time_stamp = filename_data[1].replace(/'/g, '');
+    this.author = filename_data[2].replace(/'/g, '');
+    this.organization = filename_data[3].replace(/'/g, '');
+    this.preprocessor_version = filename_data[4].replace(/'/g, '');
+    this.originating_system = filename_data[5].replace(/'/g, '');
+    this.authorization = filename_data[6].replace(/'/g, '');
     return index;
+}
+
+//Convertimos la línea de texto para obtener el schema
+IFCDoc.prototype.parseSchema = function (line) {
+    this.file_schema = line.replace(file_schema, '')
+        .replace(/'/g, '')
+        .replace(/\(/g, '')
+        .replace(/\)/g, '')
+        .replace(/;/g, '')
+        .trim();
+}
+
+IFCDoc.prototype.parseDataLine = function (line) {
+    console.log('Parsing data line');
+    var parts = line.split('=');
+    var index = parts[0].trim().replace(/#/g, '');
+    var content = parts[1].trim();
+    if (content.indexOf(CARTESIANPOINTLIST3D) !== -1) {
+        this.parseCartesianPointList(index, 3, content);
+    }
+    if (content.indexOf(TRIANGULATEDFACESET) !== -1) {
+        this.parseTriangulatedFaceSet(index, content);
+    }
+}
+
+IFCDoc.prototype.parseCartesianPointList = function (index, vertexLength, content) {
+    content = content.replace('IFCCARTESIANPOINTLIST3D', '').replace(/\(/g, '').replace(/\(/g, '').trim();
+    var points = content.split(',');
+    var vertices = [];
+    for (var i = 0; i < points.length - 2; i += vertexLength) {
+        var v = new CartesianPoint3D(parseFloat(points[i]), parseFloat(points[i + 1]), parseFloat(points[i + 2]));
+        vertices.push(v);
+    }
+    var cartesianPointList3d = new CartesianPoint3DList(index, vertices);
+    this.data.push(cartesianPointList3d);
+}
+
+IFCDoc.prototype.parseTriangulatedFaceSet = function (index, content) {
+    content = content.replace('IFCTRIANGULATEDFACESET', '').replace(/\(/g, '').replace(/\(/g, '').trim();
+    var points = content.split(',');
+    var indices = [];
+    var vertexIndex = points[0].replace('#', '');
+    for (var i = 3; i < points.length - 2; i += 3) {
+        var v = parseInt(points[i]) - 1;
+        indices.push(v);
+    }
+    var tringulatedFaceSet = new TriangulatedFaceSet(index, vertexIndex, indices);
+    this.data.push(tringulatedFaceSet);
+}
+
+IFCDoc.prototype.getDrawingInfo = function () {
+    console.log("Getting drawing info");
+    var vertices = [];
+    var indices = [];
+    for (var i = 0; i < this.data.length; i++) {
+        if (this.data[i] instanceof CartesianPoint3DList) {
+            var cplist = this.data[i];
+            for (j = 0; j < cplist.cartesianPoints.length; j++) {
+                vertices.push(cplist.cartesianPoints[j].x);
+                vertices.push(cplist.cartesianPoints[j].y);
+                vertices.push(cplist.cartesianPoints[j].z);
+            }
+        }
+        if (this.data[i] instanceof TriangulatedFaceSet) {
+            console.log('looking for indices');
+            var tfaceset = this.data[i];
+            indices = tfaceset.indices;
+        }
+    }
+    var min = 1000000000000000000000000;
+    for (var i = 0; i < indices.length; i++){
+        if (indices[i] < min){
+            min = indices[i];
+        }
+    }
+    console.log(vertices.length);
+    console.log("Min value of indices = " + min);
+    const vertexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+    const indexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
+        new Uint16Array(indices), gl.STATIC_DRAW);
+
+    var dinfo = new DrawingInfo(vertexBuffer, [], [], indexBuffer, [], indices.length);
+    return dinfo;
+}
+
+IFCDoc.prototype.onLoadComplete = function () {
+    app.drawingInfo = this.getDrawingInfo();
+    app.loadComplete = true;
 }

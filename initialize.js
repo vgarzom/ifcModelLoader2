@@ -64,52 +64,13 @@ function initProgramInfo() {
   app.programInfo = {
     program: app.shaderProgram,
     attribLocations: {
-      vertexPosition: gl.getAttribLocation(app.shaderProgram, 'aVertexPosition'),
-      textureCoord: gl.getAttribLocation(app.shaderProgram, 'aTextureCoord'),
-      vertexNormal: gl.getAttribLocation(app.shaderProgram, 'aVertexNormal')
+      vertexPosition: gl.getAttribLocation(app.shaderProgram, 'aVertexPosition')
     },
     uniformLocations: {
       projectionMatrix: gl.getUniformLocation(app.shaderProgram, 'uProjectionMatrix'),
-      modelViewMatrix: gl.getUniformLocation(app.shaderProgram, 'uModelViewMatrix'),
-      normalMatrix: gl.getUniformLocation(app.shaderProgram, 'uNormalMatrix'),
-      uSampler: gl.getUniformLocation(app.shaderProgram, 'uSampler'),
-      hasTexture: gl.getUniformLocation(app.shaderProgram, 'uHasTexture'),
-      bodyColor: gl.getUniformLocation(app.shaderProgram, 'uBodyColor')
-    },
-    lightLocations: {
-      directionalLight: {
-        color: gl.getUniformLocation(app.shaderProgram, 'uDirectionalLight.color'),
-        direction: gl.getUniformLocation(app.shaderProgram, 'uDirectionalLight.position'),
-        intensity: gl.getUniformLocation(app.shaderProgram, 'uDirectionalLight.intensity'),
-      },
-      ambientLight: gl.getUniformLocation(app.shaderProgram, 'uAmbientLight'),
-      pointLights: [],
-      spotLights: [],
+      modelViewMatrix: gl.getUniformLocation(app.shaderProgram, 'uModelViewMatrix')
     }
   };
-
-  for (var i = 0; i < 3; i++){
-    app.programInfo.lightLocations.pointLights.push(
-      {
-        intensity: gl.getUniformLocation(app.shaderProgram, 'uPointLights['+i+'].intensity'),
-        color: gl.getUniformLocation(app.shaderProgram, 'uPointLights['+i+'].color'),
-        position: gl.getUniformLocation(app.shaderProgram, 'uPointLights['+i+'].position'),
-      }
-    );
-  }
-
-  for (var i = 0; i < 6; i++){
-    app.programInfo.lightLocations.spotLights.push(
-      {
-        intensity: gl.getUniformLocation(app.shaderProgram, 'uSpotLights['+i+'].intensity'),
-        color: gl.getUniformLocation(app.shaderProgram, 'uSpotLights['+i+'].color'),
-        position: gl.getUniformLocation(app.shaderProgram, 'uSpotLights['+i+'].position'),
-        direction: gl.getUniformLocation(app.shaderProgram, 'uSpotLights['+i+'].direction'),
-        exponent: gl.getUniformLocation(app.shaderProgram, 'uSpotLights['+i+'].exponent'),
-        cutoff: gl.getUniformLocation(app.shaderProgram, 'uSpotLights['+i+'].cutoff')
-      }
-    );
-  }
 }
 
 function initTexture( url) {
