@@ -5,7 +5,7 @@ function drawWorld() {
     return;
   }
 
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
+  gl.clearColor(36/255, 67/255, 108/255, 1.0);  // Clear to black, fully opaque
   gl.clearDepth(1.0);                 // Clear everything
   gl.enable(gl.DEPTH_TEST);           // Enable depth testing
   gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
@@ -36,6 +36,7 @@ function drawWorld() {
     app.zFar);
   
   app.modelViewMatrix = mat4.create();
+  app.normalMatrix = mat4.create();
 
   mat4.translate(app.projectionMatrix,     // destination matrix
     app.projectionMatrix,     // matrix to translate

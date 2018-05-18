@@ -124,7 +124,7 @@ IFCDoc.prototype.parseSchema = function (line) {
 }
 
 IFCDoc.prototype.parseDataLine = function (line) {
-    console.log('Parsing data line');
+    //console.log('Parsing data line');
     var parts = line.split('=');
     var index = parts[0].trim().replace(/#/g, '');
     var content = parts[1].trim();
@@ -153,7 +153,7 @@ IFCDoc.prototype.parseTriangulatedFaceSet = function (index, content) {
     var points = content.split(',');
     var indices = [];
     var vertexIndex = points[0].replace('#', '');
-    for (var i = 3; i < points.length - 2; i += 3) {
+    for (var i = 3; i < points.length; i++) {
         var v = parseInt(points[i]) - 1;
         indices.push(v);
     }
@@ -162,12 +162,14 @@ IFCDoc.prototype.parseTriangulatedFaceSet = function (index, content) {
 }
 
 IFCDoc.prototype.getDrawingInfo = function () {
-    console.log("Getting drawing info");
+    //console.log("Getting drawing info");
     var vertices = [];
     var indices = [];
+    var normals = [];
+    var cplist = null;
     for (var i = 0; i < this.data.length; i++) {
         if (this.data[i] instanceof CartesianPoint3DList) {
-            var cplist = this.data[i];
+            cplist = this.data[i];
             for (j = 0; j < cplist.cartesianPoints.length; j++) {
                 vertices.push(cplist.cartesianPoints[j].x);
                 vertices.push(cplist.cartesianPoints[j].y);
@@ -175,19 +177,39 @@ IFCDoc.prototype.getDrawingInfo = function () {
             }
         }
         if (this.data[i] instanceof TriangulatedFaceSet) {
-            console.log('looking for indices');
+            //console.log('looking for indices');
             var tfaceset = this.data[i];
             indices = tfaceset.indices;
         }
     }
-    var min = 1000000000000000000000000;
-    for (var i = 0; i < indices.length; i++){
-        if (indices[i] < min){
-            min = indices[i];
+
+    //Después de tener todos los vértices e índices para las caras procedemos a calcular las normales
+    var currentIndex = 0;
+    for (var i = 0; i < indices.length - 1; i++) {
+        if (currentIndex == 2) { //Hemos encontrado los tres índices de la cara
+            var p1 = cplist.cartesianPoints[indices[i - 2]];
+            var p2 = cplist.cartesianPoints[indices[i - 1]];
+            var p3 = cplist.cartesianPoints[indices[i]];
+            var normal = getNormalVector(
+                [p1.x, p1.y, p1.z],
+                [p2.x, p2.y, p2.z],
+                [p3.x, p3.y, p3.z],
+            );
+            for (var j = 0; j < 3; j++) {
+                normals.push(normal[0]);
+                normals.push(normal[1]);
+                normals.push(normal[2]);
+            }
+            currentIndex = 0;
         }
+        currentIndex++;
     }
-    console.log(vertices.length);
-    console.log("Min value of indices = " + min);
+    console.log(normals);
+    console.log(indices);
+    console.log(vertices);
+
+    //console.log(vertices.length);
+    //console.log("Min value of indices = " + min);
     const vertexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -197,11 +219,17 @@ IFCDoc.prototype.getDrawingInfo = function () {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
         new Uint16Array(indices), gl.STATIC_DRAW);
 
-    var dinfo = new DrawingInfo(vertexBuffer, [], [], indexBuffer, [], indices.length);
+    const normalsBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, normalsBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
+        new Uint16Array(normals), gl.STATIC_DRAW);
+
+    var dinfo = new DrawingInfo(vertexBuffer, normalsBuffer, [], indexBuffer, [], indices.length);
     return dinfo;
 }
 
 IFCDoc.prototype.onLoadComplete = function () {
+    console.log(this);
     app.drawingInfo = this.getDrawingInfo();
     app.loadComplete = true;
 }

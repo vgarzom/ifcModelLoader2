@@ -64,11 +64,13 @@ function initProgramInfo() {
   app.programInfo = {
     program: app.shaderProgram,
     attribLocations: {
-      vertexPosition: gl.getAttribLocation(app.shaderProgram, 'aVertexPosition')
+      vertexPosition: gl.getAttribLocation(app.shaderProgram, 'aVertexPosition'),
+      vertexNormal: gl.getAttribLocation(app.shaderProgram, 'aVertexNormal')
     },
     uniformLocations: {
       projectionMatrix: gl.getUniformLocation(app.shaderProgram, 'uProjectionMatrix'),
-      modelViewMatrix: gl.getUniformLocation(app.shaderProgram, 'uModelViewMatrix')
+      modelViewMatrix: gl.getUniformLocation(app.shaderProgram, 'uModelViewMatrix'),
+      normalMatrix: gl.getUniformLocation(app.shaderProgram, 'uNormalMatrix')
     }
   };
 }
