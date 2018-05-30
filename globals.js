@@ -83,4 +83,4 @@ app.loadComplete = false;
 
 app.vertexCount = 0;
 
-
+app.filedata = {};

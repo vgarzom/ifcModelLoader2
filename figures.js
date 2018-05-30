@@ -258,10 +258,10 @@ function getCylData(faces) {
     indices.push(j);
   }
 
-  console.log(positions);
-  console.log(textureCoordinates);
-  console.log(indices);
-  console.log(normals);
+  //console.log(positions);
+  //console.log(textureCoordinates);
+  //console.log(indices);
+  //console.log(normals);
 
   const positionBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -300,7 +300,7 @@ function getCylData(faces) {
 
 
 function getSphereData() {
-  console.log("Finding shpere data")
+  //console.log("Finding shpere data")
   const faces = 50;
   const ylong = 1 / faces;
   const angle = 360.0 / faces;
@@ -373,12 +373,12 @@ function getSphereData() {
   for (var n = 0; n < spherePositions.length; n++) {
     sphereIndices.push(n);
   }
-
+/*
   console.log(spherePositions);
   console.log(sphereTextureCoordinates);
   console.log(sphereIndices);
   console.log("VertextCount --> " + sphereVertexCount);
-
+*/
   const spherePositionBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, spherePositionBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(spherePositions), gl.STATIC_DRAW);

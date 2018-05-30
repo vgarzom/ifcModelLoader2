@@ -80,7 +80,8 @@ IFCDoc.prototype.parse = function (fileString) {
                 }
                 continue;
             default:
-                if (command.indexOf("#") !== -1 && parsingData) {
+                line = line.trim();
+                if (command.indexOf("#") == 0 && parsingData) {
                     this.parseDataLine(line);
                 }
                 continue;
@@ -88,6 +89,7 @@ IFCDoc.prototype.parse = function (fileString) {
         }
     }
     app.ifcFile = this;
+    console.log(app.filedata);
     this.onLoadComplete();
     return true;
 }
@@ -125,7 +127,11 @@ IFCDoc.prototype.parseSchema = function (line) {
 
 IFCDoc.prototype.parseDataLine = function (line) {
     //console.log('Parsing data line');
+    line = line.replace(/ /g,'')
     var parts = line.split('=');
+    app.filedata[parts[0]] = parts[1];
+    console.log(app.filedata[parts[0]]);
+    /*
     var index = parts[0].trim().replace(/#/g, '');
     var content = parts[1].trim();
     if (content.indexOf(CARTESIANPOINTLIST3D) !== -1) {
@@ -133,7 +139,7 @@ IFCDoc.prototype.parseDataLine = function (line) {
     }
     if (content.indexOf(TRIANGULATEDFACESET) !== -1) {
         this.parseTriangulatedFaceSet(index, content);
-    }
+    }*/
 }
 
 IFCDoc.prototype.parseCartesianPointList = function (index, vertexLength, content) {
