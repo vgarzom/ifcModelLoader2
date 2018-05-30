@@ -38,12 +38,12 @@ app.walkspeed = 0.1;
 app.sliders = {};
 
 app.positions = {
-    x : 0.0,
-    z : -5.0
+    x: 0.0,
+    z: -5.0
 };
 
 app.camera = {
-    x : 2*Math.PI*30/180,
+    x: 2 * Math.PI * 30 / 180,
     y: 0,
     z: 0
 };
@@ -83,4 +83,12 @@ app.loadComplete = false;
 
 app.vertexCount = 0;
 
-app.filedata = {};
+app.filedata = {
+    'ifcCartesianPoints': {},
+    'ifcLoops': {},
+    'ifcFaceBounds': {},
+    'ifcFaces': {},
+    'ifcUnits': {},
+    'ifcDimensionalExponents': {},
+    'ifcDirections': {}
+};

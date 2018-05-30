@@ -167,21 +167,21 @@ var IfcCartesianTransformationOperator = function (axis1, axis2, localOrigin, sc
     this.scale = scale; // Real Number
 }
 
-var IfcCartesianTransformationOperator2D = function(axis1, axis2, localOrigin, scale) {
+var IfcCartesianTransformationOperator2D = function (axis1, axis2, localOrigin, scale) {
     IfcCartesianTransformationOperator.call(axis1, axis2, localOrigin, scale);
 }
 
-var IfcCartesianTransformationOperator3D = function(axis1, axis2, localOrigin, scale, axis3) {
+var IfcCartesianTransformationOperator3D = function (axis1, axis2, localOrigin, scale, axis3) {
     IfcCartesianTransformationOperator.call(axis1, axis2, localOrigin, scale);
     this.axis3 = axis3;
 }
 
 var IfcDirection = function (directionRatios) {
-    this.directionRatios = directionRatios; //Real Number []
-}
-
-var IfcCartesianPoint = function (coordinates) {
-    this.coordinates = coordinates; //IfcLengthMeasure[1:3]: Un valor de distancia normalmente en mm [x, y, z]
+    var ratios = [];
+    for (var i = 0; i < directionRatios.length; i++){
+        ratios.push(Number(directionRatios[i]));
+    }
+    this.directionRatios = ratios; //Real Number []
 }
 
 
@@ -189,20 +189,26 @@ var IfcCartesianPoint = function (coordinates) {
 var IfcPoint = function () {
 }
 
-var IfcCartesianPoint = function(x, y, z){
+var IfcCartesianPoint = function (coordinates) {
     IfcPoint.call(this);
-    this.x = x;
-    this.y = y;
-    this.z = z;
+    if (coordinates.length > 0) {
+        this.x = Number(coordinates[0]);
+    }
+    if (coordinates.length > 1) {
+        this.y = Number(coordinates[1]);
+    }
+    if (coordinates.length > 2) {
+        this.z = Number(coordinates[2]);
+    }
 }
 
-var IfcPointOnCurve = function(basisCurve, pointParameter){
+var IfcPointOnCurve = function (basisCurve, pointParameter) {
     IfcPoint.call(this);
     this.basisCurve = basisCurve; //IFCCurve
     this.pointParameter = this.pointParameter; //IfcPointParameter
 }
 
-var IfcPointOnSurface = function(basisSurface, pointParameterU, pointParameterV){
+var IfcPointOnSurface = function (basisSurface, pointParameterU, pointParameterV) {
     IfcPoint.call(this);
     this.basisSurface = basisSurface; //IfcSurface
     this.pointParameterU = this.pointParameterU; //IfcPointParameter
@@ -224,27 +230,27 @@ var IfcSolidModel = function () {
 var IfcTessellatedItem = function () {
 
 }
-var IfcIndexedPolygonalFace = function(coordIndex) {
+var IfcIndexedPolygonalFace = function (coordIndex) {
     IfcTessellatedItem.call(this);
     this.coordIndex = coordIndex; //IfcPositiveInteger[3:?]
 }
-var IfcIndexedPolygonalFaceWithVoids = function(coordIndex, innerCoordIndices) {
+var IfcIndexedPolygonalFaceWithVoids = function (coordIndex, innerCoordIndices) {
     IfcIndexedPolygonalFace.call(this);
     this.innerCoordIndices = innerCoordIndices; //IfcPositiveInteger [1:?][3:?]
 }
-var IfcTessellatedFaceSet = function(coordinates){
+var IfcTessellatedFaceSet = function (coordinates) {
     IfcTessellatedItem.call(this);
     this.coordinates = coordinates; //IfcCartesianPointList3D
 }
 
-var IfcPolygonalFaceSet = function(coordinates, closed, faces, pnIndex){
+var IfcPolygonalFaceSet = function (coordinates, closed, faces, pnIndex) {
     IfcTessellatedFaceSet.call(this, coordinates);
     this.closed = closed; //IfcBoolean
     this.faces = faces; //IfcIndexedPolygonalFace [1:?]
     this.pnIndex = pnIndex; //IfcPositiveInteger [1:?]
 }
 
-var IfcTriangulatedFaceSet = function(coordinates, normals, closed, coordIndex, pnIndex){
+var IfcTriangulatedFaceSet = function (coordinates, normals, closed, coordIndex, pnIndex) {
     IfcTessellatedFaceSet.call(this, coordinates);
     this.normals = normals;
     this.closed = closed;
@@ -252,7 +258,7 @@ var IfcTriangulatedFaceSet = function(coordinates, normals, closed, coordIndex, 
     this.pnIndex = pnIndex;
 }
 
-var IfcCartesianPointList3D = function(coordList){
+var IfcCartesianPointList3D = function (coordList) {
     this.coordList = coordList;
 }
 // -----------------------------------------------------------------------
@@ -278,22 +284,48 @@ var IfcLoop = function () {
 
 }
 
+var IfcPolyLoop = function(polygon){
+    this.polygon = polygon;
+}
+
 var IfcPath = function () {
 
 }
 
-var IfcFacedBound = function () {
-
+var IfcFaceBound = function (bound, orientation) {
+    this.bound = bound;
+    this.orientation = orientation;
 }
 
-var IfcFace = function () {
-
+var IfcFace = function (bounds) {
+    this.bounds = bounds;
 }
 
 var IfcConnectedFaceSet = function () {
 
 }
 
+// -------------------- Units
+var IfcNamedUnit = function(dimensions, unitType){
+    this.dimensions = dimensions;
+    this.unitType = unitType;
+}
+
+var IfcSIUnit = function (dimensions, unitType, prefix, name){
+    IfcNamedUnit.call(this, dimensions, unitType);
+    this.prefix = prefix;
+    this.name = name;
+}
+
+var IfcDimensionalExponents = function(args){
+    this.lengthExponent = Number(args[0]);
+    this.massExponent = Number(args[1]); 
+    this.timeExponent = Number(args[2]);
+    this.electricCurrentExponent = Number(args[3]);
+    this.thermodynamicTemperatureExponent = Number(args[4]);
+    this.amountOfSubstanceExponent = Number(args[5]);
+    this.luminousIntensityExponent = Number(args[6]);
+}
 
 var CartesianPoint3D = function (x, y, z) {
     this.x = x;

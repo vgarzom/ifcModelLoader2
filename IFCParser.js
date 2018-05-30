@@ -127,10 +127,41 @@ IFCDoc.prototype.parseSchema = function (line) {
 
 IFCDoc.prototype.parseDataLine = function (line) {
     //console.log('Parsing data line');
-    line = line.replace(/ /g,'')
+    line = line.replace(/ /g, '')
     var parts = line.split('=');
-    app.filedata[parts[0]] = parts[1];
-    console.log(app.filedata[parts[0]]);
+    var id = parts[0];
+
+    var objectType = parts[1].split('(')[0].toUpperCase();;
+
+    switch (objectType) {
+        case 'IFCCARTESIANPOINT':
+            app.filedata.ifcCartesianPoints[id] = parseIfcCartesianPoint(parts[1]);
+            break;
+        case 'IFCPOLYLOOP':
+            app.filedata.ifcLoops[id] = parseIfcPolyLoop(parts[1]);
+            break;
+        case 'IFCFACEOUTERBOUND':
+            app.filedata.ifcFaceBounds[id] = parseIfcFaceOuterBound(parts[1]);
+            break;
+        case 'IFCFACE':
+            app.filedata.ifcFaces[id] = parseIfcFace(parts[1]);
+            break;
+        case 'IFCSIUNIT':
+            app.filedata.ifcUnits[id] = parseIfcSIUnit(parts[1]);
+            break;
+        case 'IFCDIMENSIONALEXPONENTS':
+            app.filedata.ifcDimensionalExponents[id] = parseIfcDimensionalExponents(parts[1]);
+            break;
+        case 'IFCDIRECTION':
+            app.filedata.ifcDirections[id] = parseIfcDirection(parts[1]);
+            break;
+        default:
+            console.log(objectType);
+            break;
+    }
+
+    //app.filedata[parts[0]] = parts[1];
+    //console.log(app.filedata[parts[0]]);
     /*
     var index = parts[0].trim().replace(/#/g, '');
     var content = parts[1].trim();
