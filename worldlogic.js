@@ -40,7 +40,7 @@ function drawWorld() {
 
   mat4.translate(app.projectionMatrix,     // destination matrix
     app.projectionMatrix,     // matrix to translate
-    [0, 0.0, -1500]);  // amount to translate
+    [0, 0.0, -15]);  // amount to translate
 
   mat4.rotate(app.projectionMatrix,  // destination matrix
     app.projectionMatrix,  // matrix to rotate

@@ -42,13 +42,13 @@ function initInterfaceListeners() {
 
     document.addEventListener("mousedown", function (event) {
 
-        console.log('Mousedown');
+        //console.log('Mousedown');
         if (!app.ismousedown) {
             app.ismousedown = true;
             app.mousedown.x = event.clientX;
             app.mousedown.y = event.clientY;
         }
-        console.log('Mousedown ---> '+JSON.stringify(app.mousedown));
+        //console.log('Mousedown ---> '+JSON.stringify(app.mousedown));
     });
 
     document.addEventListener("mouseup", function (event) {

@@ -10,7 +10,7 @@ parseIfcPolyLoop = function (line) {
     var coords = arg.split(',');
     var result = [];
     for (var i = 0; i < coords.length; i++) {
-        result.push(app.filedata.ifcCartesianPoints[coords[i]]);
+        result.push(coords[i]);
     }
     return new IfcPolyLoop(result);
 }

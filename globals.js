@@ -109,3 +109,11 @@ app.filedata = {
 
 app.left_index = 0;
 app.left_tags = {};
+
+app.vertexmapper = {};
+app.vertex = [];
+app.ifcFacetedBrepsDraw = {
+    "indices": [],
+    "normals": [],
+    "total_vertex": 0
+};
