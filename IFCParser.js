@@ -89,7 +89,10 @@ IFCDoc.prototype.parse = function (fileString) {
         }
     }
     app.ifcFile = this;
+    console.log(app.left_index);
+    console.log(app.left_tags);
     console.log(app.filedata);
+
     this.onLoadComplete();
     return true;
 }
@@ -131,7 +134,7 @@ IFCDoc.prototype.parseDataLine = function (line) {
     var parts = line.split('=');
     var id = parts[0];
 
-    var objectType = parts[1].split('(')[0].toUpperCase();;
+    var objectType = parts[1].split('(')[0].toUpperCase();
 
     switch (objectType) {
         case 'IFCCARTESIANPOINT':
@@ -155,8 +158,77 @@ IFCDoc.prototype.parseDataLine = function (line) {
         case 'IFCDIRECTION':
             app.filedata.ifcDirections[id] = parseIfcDirection(parts[1]);
             break;
+        case 'IFCMEASUREWITHUNIT':
+        case 'IFCCONVERSIONBASEDUNIT':
+        case 'IFCUNITASSIGNMENT':
+        case 'IFCPERSON':
+        case 'IFCORGANIZATION':
+        case 'IFCPERSONANDORGANIZATION':
+        case 'IFCGEOMETRICREPRESENTATIONCONTEXT':
+        case 'IFCAPPLICATION':
+        case 'IFCOWNERHISTORY':
+        case 'IFCPROJECT':
+            break;
+        case 'IFCAXIS2PLACEMENT3D':
+            app.filedata.ifcPlacements[id] = parseIfcAxis2Placement3D(parts[1]);
+            break;
+        case 'IFCAXIS2PLACEMENT2D':
+            app.filedata.ifcPlacements[id] = parseIfcAxis2Placement2D(parts[1]);
+            break;
+        case 'IFCCOLOURRGB':
+            app.filedata.ifcColors[id] = parseIfcColourRGB(parts[1]);
+            break;
+        case 'IFCLOCALPLACEMENT':
+            app.filedata.ifcLocalPlacements[id] = parseIfcLocalPlacement(parts[1]);
+            break;
+        case 'IFCCLOSEDSHELL':
+            app.filedata.ifcConnectedFaceSets[id] = parseIfcClosedShell(parts[1]);
+            break;
+        case 'IFCOPENSHELL':
+            app.filedata.ifcConnectedFaceSets[id] = parseIfcOpenShell(parts[1]);
+            break;
+        case 'IFCFACETEDBREP':
+            app.filedata.ifcFacetedBreps[id] = parseIfcFacetedBrep(parts[1]);
+            break;
+        case 'IFCSURFACESTYLERENDERING':
+            app.filedata.ifcSurfaceStyleRenderings[id] = parseIfcSurfaceStyleRendering(parts[1]);
+            break;
+        case 'IFCSURFACESTYLE':
+            app.filedata.ifcSurfaceStyles[id] = parseIfcSurfaceStyle(parts[1]);
+            break;
+        case 'IFCPRESENTATIONSTYLEASSIGNMENT':
+            app.filedata.ifcPresentationStyleAssignments[id] = parseIfcPresentationStyleAssignment(parts[1]);
+            break;
+        case 'IFCSTYLEDITEM':
+            app.filedata.ifcStyledItems[id] = parseIfcStyledItem(parts[1]);
+            break;
+        case 'IFCCARTESIANTRANSFORMATIONOPERATOR3D':
+            app.filedata.ifcCartesianTransformationOperators[id] = parseIfcCartesianTransformationOperator3D(parts[1]);
+            break;
+        case 'IFCSHAPEREPRESENTATION':
+            app.filedata.ifcRepresentations[id] = parseIfcShapeRepresentation(parts[1]);
+            break;
+        case 'IFCREPRESENTATIONMAP':
+            app.filedata.ifcRepresentationMaps[id] = parseIfcRepresentationMap(parts[1]);
+            break;
+        case 'IFCMAPPEDITEM':
+            app.filedata.ifcMappedItems[id] = parseIfcMappedItem(parts[1]);
+            break;
+        case 'IFCSHELLBASEDSURFACEMODEL':
+            app.filedata.ifcRepresentationItems[id] = parseIfcShellBasedSurfaceModel(parts[1]);
+            break;
+        case 'IFCPOLYLINE':
+            app.filedata.ifcRepresentationItems[id] = parseIfcPolyLine(parts[1]);
+            break;
+        case 'IFCCIRCLE':
+            app.filedata.ifcRepresentationItems[id] = parseIfcCircle(parts[1]);
+            break;
         default:
-            console.log(objectType);
+            app.left_index++;
+            if (typeof (app.left_tags[objectType]) === "undefined") {
+                app.left_tags[objectType] = 0;
+            }
+            app.left_tags[objectType] = app.left_tags[objectType] + 1;
             break;
     }
 

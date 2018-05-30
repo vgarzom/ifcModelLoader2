@@ -90,5 +90,22 @@ app.filedata = {
     'ifcFaces': {},
     'ifcUnits': {},
     'ifcDimensionalExponents': {},
-    'ifcDirections': {}
+    'ifcDirections': {},
+    'ifcPlacements': {},
+    'ifcLocalPlacements': {},
+    'ifcColors': {},
+    'ifcConnectedFaceSets': {},
+    'ifcFacetedBreps': {},
+    'ifcSurfaceStyleRenderings': {},
+    'ifcSurfaceStyles': {},
+    'ifcPresentationStyleAssignments': {},
+    'ifcStyledItems': {},
+    'ifcCartesianTransformationOperators': {},
+    'ifcRepresentations': {},
+    'ifcRepresentationItems': {},
+    'ifcRepresentationMaps': {},
+    'ifcMappedItems': {},
 };
+
+app.left_index = 0;
+app.left_tags = {};

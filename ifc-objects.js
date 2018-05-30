@@ -134,13 +134,27 @@ var IfcRepresentationContext = function (contextIdentifier, contextType) {
     this.contextType = contextType;
 }
 
+var IfcRepresentationMap = function (mapOrigin, mapRepresentation) {
+    this.mappingOrigin = mapOrigin;
+    this.mappingRepresentation = mapRepresentation;
+}
+
 var IfcRepresentationItem = function () {
 
+}
+
+var IfcShapeRepresentation = function (contextOfItems, representationIdentifier, representationType, items) {
+    IfcRepresentation.call(this, contextOfItems, representationIdentifier, representationType, items);
 }
 
 //Representation Items
 var IfcGeometricRepresentationItem = function () {
     IfcRepresentationItem.call(this);
+}
+
+var IfcShellBasedSurfaceModel = function (shells) {
+    IfcGeometricRepresentationItem.call(this);
+    this.sbsmBoundaries = shells;
 }
 
 var IfcTopologicalRepresentationItem = function () {
@@ -149,6 +163,12 @@ var IfcTopologicalRepresentationItem = function () {
 
 var IfcStyledRepresentationItem = function (item, styles, name) {
     IfcRepresentationItem.call(this);
+    this.item = item;
+    this.styles = styles;
+    this.name = name;
+}
+
+var IfcStyledItem = function (item, styles, name) {
     this.item = item;
     this.styles = styles;
     this.name = name;
@@ -173,12 +193,21 @@ var IfcCartesianTransformationOperator2D = function (axis1, axis2, localOrigin, 
 
 var IfcCartesianTransformationOperator3D = function (axis1, axis2, localOrigin, scale, axis3) {
     IfcCartesianTransformationOperator.call(axis1, axis2, localOrigin, scale);
+    this.axis1 = axis1; //IfcDirection
+    this.axis2 = axis2; //IfcDirection
+    this.localOrigin = localOrigin; //IfcCartesianPoint
+    this.scale = scale; // Real Number
     this.axis3 = axis3;
+}
+
+var IfcMappedItem = function (mappingSource, mappingTarget) {
+    this.mappingSource = mappingSource;
+    this.mappingTarget = mappingTarget;
 }
 
 var IfcDirection = function (directionRatios) {
     var ratios = [];
-    for (var i = 0; i < directionRatios.length; i++){
+    for (var i = 0; i < directionRatios.length; i++) {
         ratios.push(Number(directionRatios[i]));
     }
     this.directionRatios = ratios; //Real Number []
@@ -216,8 +245,29 @@ var IfcPointOnSurface = function (basisSurface, pointParameterU, pointParameterV
 }
 // -----------------------------------------------------------------------
 var IfcCurve = function () {
-
+    IfcGeometricRepresentationItem.call(this);
 }
+
+var IfcBoundedCurve = function () {
+    IfcCurve.call(this);
+}
+
+var IfcConic = function (position) {
+    IfcCurve.call(this);
+    this.position = position;
+}
+
+var IfcPolyLine = function (points) {
+    IfcBoundedCurve.call(this);
+    this.points = points;
+}
+
+var IfcCircle = function (position, radius) {
+    IfcConic.call(this, position);
+    this.radius = radius;
+}
+
+
 
 var IfcSurface = function () {
 
@@ -284,7 +334,7 @@ var IfcLoop = function () {
 
 }
 
-var IfcPolyLoop = function(polygon){
+var IfcPolyLoop = function (polygon) {
     this.polygon = polygon;
 }
 
@@ -300,31 +350,109 @@ var IfcFaceBound = function (bound, orientation) {
 var IfcFace = function (bounds) {
     this.bounds = bounds;
 }
+var IfcConnectedFaceSet = function (faces) {
+    this.faces = faces;
+}
 
-var IfcConnectedFaceSet = function () {
+var IfcClosedShell = function (faces) {
+    IfcConnectedFaceSet.call(this, faces);
+}
 
+var IfcOpenShell = function (faces) {
+    IfcConnectedFaceSet.call(this, faces);
+}
+
+var IfcManifoldSolidBrep = function (outer) {
+    this.outer = outer;
+}
+
+var IfcFacetedBrep = function (outer) {
+    IfcManifoldSolidBrep.call(this, outer);
+}
+
+
+var IfcColourRGB = function (name, r, g, b) {
+    this.name = name;
+    this.r = r;
+    this.g = g;
+    this.b = b;
+}
+
+var IfcSurfaceStyleShading = function (surfaceColor, transparency) {
+    this.surfaceColor = surfaceColor;
+    this.transparency = transparency;
+}
+
+var IfcSurfaceStyleRendering = function (surfaceColor,
+    transparency,
+    diffuseColour,
+    transmissionColour,
+    diffuseTransmissionColour,
+    reflectionColour,
+    specularColour,
+    specularHighlight,
+    reflectanceMethod) {
+
+    IfcSurfaceStyleShading.call(this, surfaceColor, transparency);
+    this.diffuseColour = diffuseColour;
+    this.transmissionColour = transmissionColour;
+    this.diffuseTransmissionColour = diffuseTransmissionColour;
+    this.reflectionColour = reflectionColour;
+    this.specularColour = specularColour;
+    this.specularHighlight = specularHighlight;
+    this.reflectanceMethod = reflectanceMethod;
+}
+
+var IfcPresentationStyle = function (name) {
+    this.name = name;
+}
+var IfcSurfaceStyle = function (name, side, styles) {
+    IfcPresentationStyle.call(this, name);
+    this.side = side;
+    this.styles = styles;
+}
+
+var IfcPresentationStyleAssignment = function (styles) {
+    this.styles = styles;
 }
 
 // -------------------- Units
-var IfcNamedUnit = function(dimensions, unitType){
+var IfcNamedUnit = function (dimensions, unitType) {
     this.dimensions = dimensions;
     this.unitType = unitType;
 }
 
-var IfcSIUnit = function (dimensions, unitType, prefix, name){
+var IfcSIUnit = function (dimensions, unitType, prefix, name) {
     IfcNamedUnit.call(this, dimensions, unitType);
     this.prefix = prefix;
     this.name = name;
 }
 
-var IfcDimensionalExponents = function(args){
+var IfcDimensionalExponents = function (args) {
     this.lengthExponent = Number(args[0]);
-    this.massExponent = Number(args[1]); 
+    this.massExponent = Number(args[1]);
     this.timeExponent = Number(args[2]);
     this.electricCurrentExponent = Number(args[3]);
     this.thermodynamicTemperatureExponent = Number(args[4]);
     this.amountOfSubstanceExponent = Number(args[5]);
     this.luminousIntensityExponent = Number(args[6]);
+}
+
+
+//----------------------------------Placements
+var IfcPlacement = function (location) {
+    this.location = location;
+}
+
+var IfcAxis2Placement3D = function (location, axis, refDirection) {
+    IfcPlacement.call(this, location);
+    this.axis = axis;
+    this.refDirection = refDirection;
+}
+
+var IfcAxis2Placement2D = function (location, refDirection) {
+    IfcPlacement.call(this, location);
+    this.refDirection = refDirection;
 }
 
 var CartesianPoint3D = function (x, y, z) {
