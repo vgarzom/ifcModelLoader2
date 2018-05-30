@@ -341,9 +341,21 @@ IFCDoc.prototype.onLoadComplete = function () {
     console.log(this);
     //app.drawingInfo = this.getDrawingInfo();
     this.populateVertexMap();
-    for (var k in app.filedata.ifcFacetedBreps){
+    /*
+    for (var k in app.filedata.ifcFacetedBreps) {
         this.GetIfcFacetedBrepDrawingInfo(app.filedata.ifcFacetedBreps[k]);
     }
+    for (var k in app.filedata.ifcRepresentationItems) {
+        var ri = app.filedata.ifcRepresentationItems[k];
+        if (ri.constructor.name === 'IfcShellBasedSurfaceModel') {
+            this.GetIfcShellBasedSurfaceModelDrawingInfo(ri);
+        }
+    }*/
+
+    for (var f in app.filedata.ifcFaces){
+        this.GetIfcFaceDrawingInfo(app.filedata.ifcFaces[f]);
+    }
+    //
 
     const vertexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
@@ -369,39 +381,60 @@ IFCDoc.prototype.GetIfcFacetedBrepDrawingInfo = function (ifcFacetedBrep) {
     var faces = ifcFacetedBrep.outer.faces;
     for (var i = 0; i < faces.length; i++) { //Recorremos las caras
         var f = faces[i];
-        for (var j = 0; j < f.bounds.length; j++) { //Recorremos los poligonos en cada cara
-            var b = f.bounds[j];
-            if (typeof(b) === 'undefined'){
-                continue;
-            }
-            var polygon = b.bound.polygon;
+        this.GetIfcFaceDrawingInfo(f);
+    }
+}
 
-            if (polygon.length > 3) {
-                for (var k = 1; k < polygon.length - 1; k++) { //Recorremos cada punto cartesiano en el polygono
-                    app.ifcFacetedBrepsDraw.indices.push(app.vertexmapper[polygon[0]]);
-                    app.ifcFacetedBrepsDraw.indices.push(app.vertexmapper[polygon[k]]);
-                    app.ifcFacetedBrepsDraw.indices.push(app.vertexmapper[polygon[k + 1]]);
-                    app.ifcFacetedBrepsDraw.total_vertex += 3;
+IFCDoc.prototype.GetIfcShellBasedSurfaceModelDrawingInfo = function (ifcShellBasedSurfaceModel) {
+    //console.log(ifcShellBasedSurfaceModel);
+    for (var n = 0; n < ifcShellBasedSurfaceModel.sbsmBoundaries.length; n++) {
+        var b = ifcShellBasedSurfaceModel.sbsmBoundaries[n];
 
-                    //Calculamos las normales
-                    var p1 = app.filedata.ifcCartesianPoints[polygon[0]];
-                    var p2 = app.filedata.ifcCartesianPoints[polygon[k]];
-                    var p3 = app.filedata.ifcCartesianPoints[polygon[k+1]];
-                    var normal = getNormalVector(
-                        [p1.x, p1.y, p1.z],
-                        [p2.x, p2.y, p2.z],
-                        [p3.x, p3.y, p3.z],
-                    );
-                    for (var j = 0; j < 3; j++) {
-                        app.ifcFacetedBrepsDraw.normals.push(normal[0]);
-                        app.ifcFacetedBrepsDraw.normals.push(normal[1]);
-                        app.ifcFacetedBrepsDraw.normals.push(normal[2]);
-                    }
-                }
-            }
-
+        var faces = b.faces;
+        for (var i = 0; i < faces.length; i++) { //Recorremos las caras
+            var f = faces[i];
+            this.GetIfcFaceDrawingInfo(f)
         }
     }
+}
+
+
+IFCDoc.prototype.GetIfcFaceDrawingInfo = function (f) {
+    //console.log(f);
+    for (var j = 0; j < f.bounds.length; j++) { //Recorremos los poligonos en cada cara
+        var b = f.bounds[j];
+        if (typeof (b) === 'undefined') {
+            continue;
+        }
+        var polygon = b.bound.polygon;
+
+        if (polygon.length > 3) {
+            for (var k = 1; k < polygon.length - 1; k++) { //Recorremos cada punto cartesiano en el polygono
+                app.ifcFacetedBrepsDraw.indices.push(app.vertexmapper[polygon[0]]);
+                app.ifcFacetedBrepsDraw.indices.push(app.vertexmapper[polygon[k]]);
+                app.ifcFacetedBrepsDraw.indices.push(app.vertexmapper[polygon[k + 1]]);
+                app.ifcFacetedBrepsDraw.total_vertex += 3;
+
+                //Calculamos las normales
+                var p1 = app.filedata.ifcCartesianPoints[polygon[0]];
+                var p2 = app.filedata.ifcCartesianPoints[polygon[k]];
+                var p3 = app.filedata.ifcCartesianPoints[polygon[k + 1]];
+                var normal = getNormalVector(
+                    [p1.x, p1.y, p1.z],
+                    [p2.x, p2.y, p2.z],
+                    [p3.x, p3.y, p3.z],
+                );
+                for (var j = 0; j < 3; j++) {
+                    app.ifcFacetedBrepsDraw.normals.push(normal[0]);
+                    app.ifcFacetedBrepsDraw.normals.push(normal[1]);
+                    app.ifcFacetedBrepsDraw.normals.push(normal[2]);
+                }
+            }
+        }
+
+
+    }
+
 }
 
 IFCDoc.prototype.populateVertexMap = function () {
