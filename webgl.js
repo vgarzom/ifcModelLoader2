@@ -7,7 +7,8 @@ function render(now) {
 }
 
 function webGLStart() {
-  readIFCFile("ifc-models/test3.ifc");
+  var modelsUrl = "ifc-models/";
+  readIFCFile(modelsUrl+"test3.ifc");
   canvas = document.getElementById("mycanvas");
   initGL(canvas);
   initShaders();

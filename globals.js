@@ -19,6 +19,7 @@ var gl;
 var canvas;
 // application var holder
 var app = {};
+app.selectedModel = "stairs.ifc";
 app.dayTime = 0.0;
 app.shaderProgram = {};
 app.programInfo = {};
@@ -117,3 +118,5 @@ app.ifcFacetedBrepsDraw = {
     "normals": [],
     "total_vertex": 0
 };
+
+app.drawingobjects = {};

@@ -66,11 +66,21 @@
 </head>
 
 <body style='padding:0; margin:0;'>
-  <div id="container" style="background: white">
-    <p>Utiliza A,W,S,D para mover al rededor. Click y mueve el mouse para mover la camara</p>
+  <div class="slidecontainer">
+    <label id="zoomLabel">zoom:</label>
+    <input type="range" min="1" max="1000" value="1" class="slider slider-x" id="zoomRange">
   </div>
   <canvas id="mycanvas" style="border: solid 1px;" width="500" height="500"></canvas>
+  <div style="background: white">
+    <p>Click y mueve el mouse para mover la camara</p>
+    <input type="checkbox" id="check_all" onclick="enableDisableAll()">Todos</input>
+    <br/>"
+    <div id="checkboxContainer" style="height: 200px; overflow: scroll;">
+
+    </div>
+  </div>
   <br />
+
 
 </body>
 

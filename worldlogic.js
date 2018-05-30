@@ -1,11 +1,11 @@
 
 function drawWorld() {
 
-  if(!app.loadComplete){
+  if (!app.loadComplete) {
     return;
   }
 
-  gl.clearColor(36/255, 67/255, 108/255, 1.0);  // Clear to black, fully opaque
+  gl.clearColor(36 / 255, 67 / 255, 108 / 255, 1.0);  // Clear to black, fully opaque
   gl.clearDepth(1.0);                 // Clear everything
   gl.enable(gl.DEPTH_TEST);           // Enable depth testing
   gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
@@ -27,14 +27,14 @@ function drawWorld() {
   // note: glmatrix.js always has the first argument
   // as the destination to receive the result.
   app.fieldOfView = 45 * Math.PI / 180;
-  app.zNear = 0.1;
+  app.zNear = 0.001;
   app.zFar = 1000000.0;
   mat4.perspective(app.projectionMatrix,
     app.fieldOfView,
     aspect,
     app.zNear,
     app.zFar);
-  
+
   app.modelViewMatrix = mat4.create();
   app.normalMatrix = mat4.create();
 
@@ -53,15 +53,23 @@ function drawWorld() {
     [1, 0, 0]);       // axis to rotate around (X)
 
   mvPushMatrix();
-  drawElement(app.drawingInfo, null, false, [1.0, 0.0, 0.0, 1.0]);
+  var scale = app.sliders.zoom.value;
+  mat4.scale(app.modelViewMatrix, app.modelViewMatrix, [scale,scale,scale]);
+  for (var i in app.drawingobjects) {
+    var obj = app.drawingobjects[i];
+    if (!obj.disabled) {
+      drawElement(obj.drawingInfo, null, false, [1.0, 0.0, 0.0, 1.0]);
+    }
+  }
+
   mvPopMatrix();
 
   updateDayTime();
 }
 
-function updateDayTime(){
+function updateDayTime() {
   app.dayTime += app.deltaTime;
-  if (app.dayTime >= 24){
+  if (app.dayTime >= 24) {
     app.dayTime = 0;
   }
 }

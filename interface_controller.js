@@ -1,5 +1,6 @@
 function initInterfaceListeners() {
-    /*app.sliders.speed = document.getElementById("speedRange");
+    app.sliders.zoom = document.getElementById("zoomRange");
+    /*
     app.sliders.speedLabel = document.getElementById('speedLabel');
 
     document.getElementById("first").onclick = function () { app.camera.selected = FIRST };
@@ -55,3 +56,36 @@ function initInterfaceListeners() {
         app.ismousedown = false;
     });
 }
+
+function updateCheckboxList(){
+    var container = document.getElementById("checkboxContainer");
+    var inner = "";
+    for (var i in app.drawingobjects){
+        var checked = "";
+        if (!app.drawingobjects[i].disabled){
+            checked = "checked";
+        }
+        inner += "<input type=\"checkbox\" id=\"myCheck"+i+"\" onclick=\"enableObject('"+i+"')\" "+checked+">"+i+"</input><br/>"
+    }
+    container.innerHTML = inner;
+}
+
+function enableObject(k){
+    app.drawingobjects[k].disabled = !app.drawingobjects[k].disabled;
+}
+
+function enableDisableAll(){
+    for (var k in app.drawingobjects){
+        app.drawingobjects[k].disabled = false;
+    }
+    updateCheckboxList();
+}
+
+function mostrarprecio() {
+    var pizza = document.getElementById("pizza"),
+       precio = document.getElementById("precio");
+  
+    precio.value = pizza.value
+    app.selectedModel = precio.value;
+    webGLStart();
+  }

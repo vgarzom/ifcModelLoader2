@@ -17,6 +17,25 @@ function Array2Buffer(array, iSize, nSize) {
   return buffer;
 }
 
+function indices2Buffers(drawingInfo) {
+  const vertexBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(app.vertex), gl.STATIC_DRAW);
+
+  const indexBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
+    new Uint16Array(drawingInfo.indices), gl.STATIC_DRAW);
+
+  const normalsBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, normalsBuffer);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
+    new Uint16Array(drawingInfo.normals), gl.STATIC_DRAW);
+
+  var dinfo = new DrawingInfo(vertexBuffer, normalsBuffer, [], indexBuffer, [], drawingInfo.total_vertex);
+  return dinfo;
+}
+
 function drawElement(buffer, textureobj, hasTexture, bodyColor = [1.0, 1.0, 1.0]) {
   // Tell WebGL how to pull out the positions from the position
   // buffer into the vertexPosition attribute

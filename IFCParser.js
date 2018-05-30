@@ -129,7 +129,6 @@ IFCDoc.prototype.parseSchema = function (line) {
 }
 
 IFCDoc.prototype.parseDataLine = function (line) {
-    //console.log('Parsing data line');
     line = line.replace(/ /g, '')
     var parts = line.split('=');
     var id = parts[0];
@@ -341,22 +340,27 @@ IFCDoc.prototype.onLoadComplete = function () {
     console.log(this);
     //app.drawingInfo = this.getDrawingInfo();
     this.populateVertexMap();
-    /*
+
     for (var k in app.filedata.ifcFacetedBreps) {
-        this.GetIfcFacetedBrepDrawingInfo(app.filedata.ifcFacetedBreps[k]);
+        var drawingObject = {'disabled':true};
+        var drawingInfo = this.GetIfcFacetedBrepDrawingInfo(app.filedata.ifcFacetedBreps[k]);
+        drawingObject.drawingInfo = indices2Buffers(drawingInfo);
+        app.drawingobjects[k] = drawingObject;
+
     }
     for (var k in app.filedata.ifcRepresentationItems) {
         var ri = app.filedata.ifcRepresentationItems[k];
         if (ri.constructor.name === 'IfcShellBasedSurfaceModel') {
-            this.GetIfcShellBasedSurfaceModelDrawingInfo(ri);
+            var drawingObject = {'disabled':true};
+            var drawingInfo = this.GetIfcShellBasedSurfaceModelDrawingInfo(ri);
+            drawingObject.drawingInfo = indices2Buffers(drawingInfo);
+            app.drawingobjects[k] = drawingObject;
         }
-    }*/
-
-    for (var f in app.filedata.ifcFaces){
-        this.GetIfcFaceDrawingInfo(app.filedata.ifcFaces[f]);
     }
     //
-
+    console.log(app.drawingobjects);
+    updateCheckboxList();
+    /*
     const vertexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(app.vertex), gl.STATIC_DRAW);
@@ -374,33 +378,53 @@ IFCDoc.prototype.onLoadComplete = function () {
     var dinfo = new DrawingInfo(vertexBuffer, normalsBuffer, [], indexBuffer, [], app.ifcFacetedBrepsDraw.total_vertex);
     app.loadComplete = true;
     app.drawingInfo = dinfo;
+
     console.log(dinfo);
+    */
+   app.loadComplete = true;
 }
 
 IFCDoc.prototype.GetIfcFacetedBrepDrawingInfo = function (ifcFacetedBrep) {
     var faces = ifcFacetedBrep.outer.faces;
+    var drawingInfo = {
+        'indices': [],
+        'total_vertex': 0,
+        'normals': [],
+        'vertices': []
+    };
     for (var i = 0; i < faces.length; i++) { //Recorremos las caras
         var f = faces[i];
-        this.GetIfcFaceDrawingInfo(f);
+        this.GetIfcFaceDrawingInfo(f, drawingInfo);
     }
+
+    return drawingInfo;
 }
 
 IFCDoc.prototype.GetIfcShellBasedSurfaceModelDrawingInfo = function (ifcShellBasedSurfaceModel) {
     //console.log(ifcShellBasedSurfaceModel);
+    var drawingInfo = {
+        'indices': [],
+        'total_vertex': 0,
+        'normals': [],
+        'vertices': []
+    };
     for (var n = 0; n < ifcShellBasedSurfaceModel.sbsmBoundaries.length; n++) {
         var b = ifcShellBasedSurfaceModel.sbsmBoundaries[n];
 
         var faces = b.faces;
         for (var i = 0; i < faces.length; i++) { //Recorremos las caras
             var f = faces[i];
-            this.GetIfcFaceDrawingInfo(f)
+            this.GetIfcFaceDrawingInfo(f, drawingInfo)
         }
     }
+
+    return drawingInfo;
 }
 
 
-IFCDoc.prototype.GetIfcFaceDrawingInfo = function (f) {
+IFCDoc.prototype.GetIfcFaceDrawingInfo = function (f, drawingInfo) {
     //console.log(f);
+
     for (var j = 0; j < f.bounds.length; j++) { //Recorremos los poligonos en cada cara
         var b = f.bounds[j];
         if (typeof (b) === 'undefined') {
@@ -410,10 +434,10 @@ IFCDoc.prototype.GetIfcFaceDrawingInfo = function (f) {
 
         if (polygon.length > 3) {
             for (var k = 1; k < polygon.length - 1; k++) { //Recorremos cada punto cartesiano en el polygono
-                app.ifcFacetedBrepsDraw.indices.push(app.vertexmapper[polygon[0]]);
-                app.ifcFacetedBrepsDraw.indices.push(app.vertexmapper[polygon[k]]);
-                app.ifcFacetedBrepsDraw.indices.push(app.vertexmapper[polygon[k + 1]]);
-                app.ifcFacetedBrepsDraw.total_vertex += 3;
+                drawingInfo.indices.push(app.vertexmapper[polygon[0]]);
+                drawingInfo.indices.push(app.vertexmapper[polygon[k]]);
+                drawingInfo.indices.push(app.vertexmapper[polygon[k + 1]]);
+                drawingInfo.total_vertex += 3;
 
                 //Calculamos las normales
                 var p1 = app.filedata.ifcCartesianPoints[polygon[0]];
@@ -425,15 +449,17 @@ IFCDoc.prototype.GetIfcFaceDrawingInfo = function (f) {
                     [p3.x, p3.y, p3.z],
                 );
                 for (var j = 0; j < 3; j++) {
-                    app.ifcFacetedBrepsDraw.normals.push(normal[0]);
-                    app.ifcFacetedBrepsDraw.normals.push(normal[1]);
-                    app.ifcFacetedBrepsDraw.normals.push(normal[2]);
+                    drawingInfo.normals.push(normal[0]);
+                    drawingInfo.normals.push(normal[1]);
+                    drawingInfo.normals.push(normal[2]);
                 }
             }
         }
 
 
     }
+
+    return drawingInfo;
 
 }
 
